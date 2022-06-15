@@ -59,5 +59,8 @@ class RmdX8:
                 self.speed_feedback = np.int16((msg_recv.data[5]<<8)+(msg_recv.data[4]))
                 print(f"speed_feedback: {self.speed_feedback}")
 
+                self.position_feedback = np.int16((msg_recv.data[7]<<8)+(msg_recv.data[6]))
+                print(f"speed_feedback: {self.position_feedback}")
+
             except can.CanError:
                 print("Message NOT sent")
