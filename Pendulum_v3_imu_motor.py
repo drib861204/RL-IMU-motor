@@ -12,10 +12,12 @@ Title: gym/gym/envs/classic_control/pendulum.py
 Author: [openai](https://github.com/openai)
 Last modified: 2021/10/31
 """
+import imp
 import pygame
 from math import pi, sin, cos
 import numpy as np
 from rmdx8 import *
+from OpenIMU_SPI import *
 
 import gym
 from gym import spaces, logger
@@ -53,6 +55,8 @@ class Pendulum(gym.Env):
 
         self.motor = RmdX8()
         self.motor.cmd_send("ST", np.uint16(0))
+
+        self.openimu_spi = SpiOpenIMU(target_module="330ZI",drdy_status=True, fw='26.0.7', cs_pin = 19, interrupt_pin = 20)
 
         self.Ip = self.mass_rod*self.len_rod**2+self.mass_wheel*self.len_wheel**2+self.momentum_rod+self.momentum_wheel
         self.mbarg = (self.mass_rod*self.len_rod+self.mass_wheel*self.len_wheel)*self.gravity

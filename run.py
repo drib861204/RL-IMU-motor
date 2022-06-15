@@ -11,8 +11,8 @@ import argparse
 from files import MultiPro
 from files.Agent import Agent
 import json
-from Pendulum_v3 import *  # added by Ben
 import matplotlib.pyplot as plt
+from real_env import *
 
 
 def timer(start, end):
