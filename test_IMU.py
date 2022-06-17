@@ -2,6 +2,19 @@ from OpenIMU_SPI import *
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import RPi.GPIO as GPIO
+
+nRST_PIN = 21
+time.sleep(0.1)
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(nRST_PIN, GPIO.OUT)
+time.sleep(0.1)
+GPIO.output(nRST_PIN, 0)
+time.sleep(5)
+GPIO.output(nRST_PIN, 1)
+print("Reset Ready")
+time.sleep(0.1)
 
 #object = RmdX8()
 #object.cmd_send("ST", np.uint16(0))
@@ -26,7 +39,7 @@ t = []
 log = []
 
 #while True:
-for _ in range(1000):
+for _ in range(100000):
     '''cur_time = 0
     pre_time = 0
     dev = 0
@@ -39,23 +52,37 @@ for _ in range(1000):
             pre_time = cur_time'''
 
 
-    single = True
+    single = False
+    read_degree = True
     if single:
-        i = 5
+        i = 15
         read_value = openimu_spi.single_read(read_reg[i])
         str_temp = "{0:_<40s}0x{1:<5X} read value: 0x{2:<10X}\n".format(read_name[i], read_reg[i], read_value)
         print(str_temp)
 
-        #time.sleep(1)
+        time.sleep(1)
     else:
-        list_rate, list_acc, list_deg = openimu_spi.burst_read(first_register=0x56,subregister_num=15)
-        str_burst = "time:{0:>10f};  gyro:{1:>25s};  accel:{2:>25s} \n".format(
-            time.clock(), ", ".join([str(x) for x in list_rate]), ", ".join([str(x) for x in list_acc])
-            )
-        print(str_burst)
-        read_value = list_rate[0]
+        if read_degree:
+            list_rate, list_acc, list_deg = openimu_spi.burst_read(first_register=0x3D,subregister_num=11)
+            str_burst = "time:{0:>10f};  gyro:{1:>25s};  accel:{2:>25s};  deg:{2:>25s} \n".format(
+                time.clock(), ", ".join([str(x) for x in list_rate]), ", ".join([str(x) for x in list_acc]), ", ".join([str(x) for x in list_deg])
+                )
+            print(str_burst)
+            q1 = list_deg[1]*100
+            q1_dot = list_rate[1]
+            '''if abs(q1)>1000:
+                q1 = 0
+            if abs(q1_dot)>1000:
+                q1_dot = 0'''
+        else:
+            list_rate, list_acc = openimu_spi.burst_read(first_register=0x3E,subregister_num=11)
+            str_burst = "time:{0:>10f};  gyro:{1:>25s};  accel:{2:>25s} \n".format(
+                time.clock(), ", ".join([str(x) for x in list_rate]), ", ".join([str(x) for x in list_acc])
+                )
+            print(str_burst)
 
-    ax.plot(time.clock(), read_value, 'bo')
+    ax.plot(time.clock(), q1, 'bo')
+    ax.plot(time.clock(), q1_dot, 'r*')
     plt.draw()
     plt.pause(0.005)
     time.sleep(0.005)

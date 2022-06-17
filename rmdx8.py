@@ -15,7 +15,7 @@ class RmdX8:
 
         self.bus = can.Bus(receive_own_messages=True)
 
-    def cmd_send(self, cmd, Iq): # data = np.uint16(value)
+    def cmd_send(self, cmd, Iq=np.uint16(0)): # data = np.uint16(value)
         if cmd == self.SET_TORQUE_CMD:
             print("Set torque for motor run")
             self.m_motor_torque = Iq * self.scale
@@ -55,12 +55,11 @@ class RmdX8:
 
                 #print(f"data[5]: {hex(msg_recv.data[5])}")
                 #print(f"data[4]: {hex(msg_recv.data[4])}")
-                self.speed_feedback = np.int16((msg_recv.data[5]<<8)+(msg_recv.data[4]))*pi/180
-                self.speed_feedback = np.int16((msg_recv.data[5]<<8)+(msg_recv.data[4]))
+                self.speed_feedback = np.int16((msg_recv.data[5]<<8)+(msg_recv.data[4]))*pi/180/6
                 print(f"speed_feedback: {self.speed_feedback}")
 
                 self.position_feedback = np.int16((msg_recv.data[7]<<8)+(msg_recv.data[6]))
-                print(f"speed_feedback: {self.position_feedback}")
+                print(f"position_feedback: {self.position_feedback}")
 
             except can.CanError:
                 print("Message NOT sent")
